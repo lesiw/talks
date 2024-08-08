@@ -62,7 +62,7 @@ func run(args ...string) error {
 	return nil
 }
 
-func upload(r io.Reader, bucket, key string) error {
+func upload(r io.ReadSeeker, bucket, key string) error {
 	ctx := context.Background()
 	client := newS3Client(aws.Config{Region: "us-east-1"}, s3OptsFunc)
 
@@ -79,6 +79,9 @@ upload:
 		)
 		if err != nil {
 			return fmt.Errorf("failed to create bucket: %w", err)
+		}
+		if _, err := r.Seek(0, 0); err != nil {
+			return fmt.Errorf("failed to seek reader: %w", err)
 		}
 		goto upload
 	} else if err != nil {

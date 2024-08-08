@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io"
 	"os"
@@ -19,8 +20,8 @@ func TestMainFunction(t *testing.T) {
 		assert.Equal(t, path, "file.dat")
 		return f, nil
 	})
-	swap(t, &uploadFunc, func(rdr io.Reader, bucket, key string) error {
-		assert.Equal(t, rdr, f)
+	swap(t, &uploadFunc, func(r io.ReadSeeker, bucket, key string) error {
+		assert.Equal(t, r, f)
 		assert.Equal(t, bucket, "somebucket")
 		assert.Equal(t, key, "some/key")
 		return nil
@@ -38,7 +39,7 @@ func TestMainBadArgs(t *testing.T) {
 		t.Errorf("open called")
 		return nil, nil
 	})
-	swap(t, &uploadFunc, func(rdr io.Reader, bucket, key string) error {
+	swap(t, &uploadFunc, func(io.ReadSeeker, string, string) error {
 		t.Errorf("uploadFunc called")
 		return nil
 	})
@@ -60,7 +61,7 @@ func TestMainBadFile(t *testing.T) {
 		assert.Equal(t, path, "badfile")
 		return nil, ferr
 	})
-	swap(t, &uploadFunc, func(rdr io.Reader, bucket, key string) error {
+	swap(t, &uploadFunc, func(io.ReadSeeker, string, string) error {
 		t.Errorf("uploadFunc called")
 		return nil
 	})
@@ -81,7 +82,7 @@ func TestMainBadPath(t *testing.T) {
 		assert.Equal(t, path, "goodfile")
 		return new(os.File), nil
 	})
-	swap(t, &uploadFunc, func(rdr io.Reader, bucket, key string) error {
+	swap(t, &uploadFunc, func(io.ReadSeeker, string, string) error {
 		t.Errorf("uploadFunc called")
 		return nil
 	})
@@ -102,8 +103,8 @@ func TestMainUploadError(t *testing.T) {
 		assert.Equal(t, path, "goodfile")
 		return f, nil
 	})
-	swap(t, &uploadFunc, func(rdr io.Reader, bucket, key string) error {
-		assert.Equal(t, rdr, f)
+	swap(t, &uploadFunc, func(r io.ReadSeeker, bucket, key string) error {
+		assert.Equal(t, r, f)
 		assert.Equal(t, bucket, "somebucket")
 		assert.Equal(t, key, "some/key")
 		return uerr
@@ -139,10 +140,23 @@ func TestBucketDoesNotExist(t *testing.T) {
 	swap(t, &newS3Client, func(aws.Config, ...func(*s3.Options)) *S3Client {
 		return c
 	})
-	r := strings.NewReader("foo")
-	c._PutObject_Return(nil, errors.New("NoSuchBucket"))
+	contents := "Hello world"
+	r := strings.NewReader(contents)
+	c._PutObject_Do(func(
+		_ context.Context, in *s3.PutObjectInput, _ ...func(*s3.Options),
+	) (*s3.PutObjectOutput, error) {
+		_, _ = io.ReadAll(in.Body) // PutObject may empty its reader.
+		return nil, errors.New("NoSuchBucket")
+	})
 	c._CreateBucket_Stub()
-	c._PutObject_Return(nil, nil)
+	c._PutObject_Do(func(
+		_ context.Context, in *s3.PutObjectInput, _ ...func(*s3.Options),
+	) (*s3.PutObjectOutput, error) {
+		buf, err := io.ReadAll(in.Body)
+		assert.NilError(t, err)
+		assert.Equal(t, contents, string(buf))
+		return nil, nil
+	})
 
 	err := upload(r, "bucket", "file.txt")
 
