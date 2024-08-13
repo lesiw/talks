@@ -22,10 +22,7 @@ var (
 		return &S3Client{s3.NewFromConfig(cfg, optFn...)}
 	}
 
-	s3opts = struct {
-		BaseEndpoint *string
-		Credentials  credentials.StaticCredentialsProvider
-	}{
+	s3opts = s3.Options{
 		BaseEndpoint: aws.String("http://127.0.0.1:9000"),
 		Credentials: credentials.NewStaticCredentialsProvider(
 			"minioadmin", "minioadmin", ""),
@@ -68,9 +65,9 @@ func upload(r io.ReadSeeker, bucket, key string) error {
 
 upload:
 	_, err := client.PutObject(ctx, &s3.PutObjectInput{
+		Body:   r,
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
-		Body:   r,
 	})
 	if err != nil && strings.Contains(err.Error(), "NoSuchBucket") {
 		_, err := client.CreateBucket(
@@ -81,7 +78,7 @@ upload:
 			return fmt.Errorf("failed to create bucket: %w", err)
 		}
 		if _, err := r.Seek(0, 0); err != nil {
-			return fmt.Errorf("failed to seek reader: %w", err)
+			return fmt.Errorf("failed to rewind reader: %w", err)
 		}
 		goto upload
 	} else if err != nil {

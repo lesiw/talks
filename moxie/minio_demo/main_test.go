@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -11,19 +12,24 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"gotest.tools/v3/assert"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestMainFunction(t *testing.T) {
 	f := &os.File{}
 	swap(t, &open, func(path string) (*os.File, error) {
-		assert.Equal(t, path, "file.dat")
+		if want := "file.dat"; path != want {
+			t.Errorf("open(%q), want %q", path, want)
+		}
 		return f, nil
 	})
 	swap(t, &uploadFunc, func(r io.ReadSeeker, bucket, key string) error {
-		assert.Equal(t, r, f)
-		assert.Equal(t, bucket, "somebucket")
-		assert.Equal(t, key, "some/key")
+		if r != f || bucket != "somebucket" || key != "some/key" {
+			t.Errorf("upload(%p, %q, %q), want %p, %q, %q",
+				r, bucket, key,
+				f, "somebucket", "some/key")
+		}
 		return nil
 	})
 	swap(t, &os.Args, []string{"prog", "somebucket/some/key", "file.dat"})
@@ -34,21 +40,25 @@ func TestMainFunction(t *testing.T) {
 func TestMainBadArgs(t *testing.T) {
 	errbuf := new(bytes.Buffer)
 	swap[io.Writer](t, &stderr, errbuf)
-	swap(t, &exit, func(code int) { assert.Equal(t, code, 1) })
+	swap(t, &exit, func(code int) {
+		if want := 1; code != want {
+			t.Errorf("exit(%d), want %d", code, want)
+		}
+	})
 	swap(t, &open, func(path string) (*os.File, error) {
-		t.Errorf("open called")
+		t.Errorf("open(%q), want no calls", path)
 		return nil, nil
 	})
-	swap(t, &uploadFunc, func(io.ReadSeeker, string, string) error {
-		t.Errorf("uploadFunc called")
+	swap(t, &uploadFunc, func(r io.ReadSeeker, bucket, key string) error {
+		t.Errorf("upload(%p, %q, %q), want no calls", r, bucket, key)
 		return nil
 	})
 	swap(t, &os.Args, []string{"prog", "somebucket/some/key"})
 
 	main()
 
-	if !strings.Contains(errbuf.String(), "usage:") {
-		t.Errorf("expected usage string, got %q", errbuf.String())
+	if got, s := errbuf.String(), "usage:"; !strings.Contains(got, s) {
+		t.Errorf("errbuf = %q, want substr %q", got, s)
 	}
 }
 
@@ -56,41 +66,55 @@ func TestMainBadFile(t *testing.T) {
 	errbuf := new(bytes.Buffer)
 	ferr := errors.New("no such file")
 	swap[io.Writer](t, &stderr, errbuf)
-	swap(t, &exit, func(code int) { assert.Equal(t, code, 1) })
+	swap(t, &exit, func(code int) {
+		if want := 1; code != want {
+			t.Errorf("exit(%d), want %d", code, want)
+		}
+	})
 	swap(t, &open, func(path string) (*os.File, error) {
-		assert.Equal(t, path, "badfile")
+		if want := "badfile"; path != want {
+			t.Errorf("open(%q), want %q", path, want)
+		}
 		return nil, ferr
 	})
-	swap(t, &uploadFunc, func(io.ReadSeeker, string, string) error {
-		t.Errorf("uploadFunc called")
+	swap(t, &uploadFunc, func(r io.ReadSeeker, bucket, key string) error {
+		t.Errorf("upload(%p, %q, %q), want no calls", r, bucket, key)
 		return nil
 	})
 	swap(t, &os.Args, []string{"prog", "somebucket/some/key", "badfile"})
 
 	main()
 
-	if !strings.Contains(errbuf.String(), ferr.Error()) {
-		t.Errorf("want %q, got %q", ferr.Error(), errbuf.String())
+	if got, s := errbuf.String(), ferr.Error(); !strings.Contains(got, s) {
+		t.Errorf("errbuf = %q, want substr %q", got, s)
 	}
 }
 
 func TestMainBadPath(t *testing.T) {
 	errbuf := new(bytes.Buffer)
 	swap[io.Writer](t, &stderr, errbuf)
-	swap(t, &exit, func(code int) { assert.Equal(t, code, 1) })
+	swap(t, &exit, func(code int) {
+		if want := 1; code != want {
+			t.Errorf("exit(%d), want %d", code, want)
+		}
+	})
 	swap(t, &open, func(path string) (*os.File, error) {
-		assert.Equal(t, path, "goodfile")
+		if want := "goodfile"; path != want {
+			t.Errorf("open(%q), want %q", path, want)
+		}
 		return new(os.File), nil
 	})
-	swap(t, &uploadFunc, func(io.ReadSeeker, string, string) error {
-		t.Errorf("uploadFunc called")
+	swap(t, &uploadFunc, func(r io.ReadSeeker, bucket, key string) error {
+		t.Errorf("upload(%p, %q, %q), want no calls", r, bucket, key)
 		return nil
 	})
 	swap(t, &os.Args, []string{"prog", "badpath", "goodfile"})
 
 	main()
 
-	assert.Equal(t, errbuf.String(), "bad path: \"badpath\"\n")
+	if got, want := errbuf.String(), "bad path: \"badpath\"\n"; got != want {
+		t.Errorf("errbuf -want +got\n%s", cmp.Diff(got, want))
+	}
 }
 
 func TestMainUploadError(t *testing.T) {
@@ -98,22 +122,32 @@ func TestMainUploadError(t *testing.T) {
 	f := new(os.File)
 	uerr := errors.New("failed to upload file")
 	swap[io.Writer](t, &stderr, errbuf)
-	swap(t, &exit, func(code int) { assert.Equal(t, code, 1) })
+	swap(t, &exit, func(code int) {
+		if want := 1; code != want {
+			t.Errorf("exit(%d), want %d", code, want)
+		}
+	})
 	swap(t, &open, func(path string) (*os.File, error) {
-		assert.Equal(t, path, "goodfile")
+		if want := "goodfile"; path != want {
+			t.Errorf("open(%q), want %q", path, want)
+		}
 		return f, nil
 	})
 	swap(t, &uploadFunc, func(r io.ReadSeeker, bucket, key string) error {
-		assert.Equal(t, r, f)
-		assert.Equal(t, bucket, "somebucket")
-		assert.Equal(t, key, "some/key")
+		if r != f || bucket != "somebucket" || key != "some/key" {
+			t.Errorf("upload(%p, %q, %q), want %p, %q, %q",
+				r, bucket, key,
+				f, "somebucket", "some/key")
+		}
 		return uerr
 	})
 	swap(t, &os.Args, []string{"prog", "somebucket/some/key", "goodfile"})
 
 	main()
 
-	assert.Assert(t, strings.Contains(errbuf.String(), uerr.Error()))
+	if got, s := errbuf.String(), uerr.Error(); !strings.Contains(got, s) {
+		t.Errorf("errbuf = %q, want substr %q", got, s)
+	}
 }
 
 func TestBucketExists(t *testing.T) {
@@ -121,18 +155,34 @@ func TestBucketExists(t *testing.T) {
 	swap(t, &newS3Client, func(aws.Config, ...func(*s3.Options)) *S3Client {
 		return c
 	})
-	r := strings.NewReader("foo")
+	body := "Hello, world!"
+	r, bucket, key := strings.NewReader(body), "bucket", "file.txt"
 	c._PutObject_Stub()
 
-	err := upload(r, "bucket", "file.txt")
+	uerr := upload(r, bucket, key)
 
-	assert.NilError(t, err)
-	assert.Equal(t, len(c._PutObject_Calls()), 1)
-	call := c._PutObject_Calls()[0]
-	assert.Equal(t, *call.params.Bucket, "bucket")
-	assert.Equal(t, *call.params.Key, "file.txt")
-	assert.Equal(t, call.params.Body, r)
-	assert.Equal(t, len(c._CreateBucket_Calls()), 0)
+	if uerr != nil {
+		t.Errorf("upload(%p, %q, %q) = %q, want nil", r, bucket, key, uerr)
+	}
+	if gotc, wantc := len(c._PutObject_Calls()), 1; gotc == wantc {
+		params := c._PutObject_Calls()[0].params
+		if got, want := ptrstr(params.Bucket), ptrstr(&bucket); got != want {
+			t.Errorf("PutObjectInput.Bucket = %s, want %s", got, want)
+		}
+		if got, want := ptrstr(params.Key), ptrstr(&key); got != want {
+			t.Errorf("PutObjectInput.Key = %s, want %s", got, want)
+		}
+		if buf, err := io.ReadAll(params.Body); err != nil {
+			t.Errorf("failed to read PutObjectInput.Body: %s", err)
+		} else if got, want := string(buf), body; got != want {
+			t.Errorf("PutObjectInput.Body = %q, want %q", got, want)
+		}
+	} else {
+		t.Errorf("PutObject call count = %d, want %d", gotc, wantc)
+	}
+	if gotc, wantc := len(c._CreateBucket_Calls()), 0; gotc != wantc {
+		t.Errorf("CreateBucket call count = %d, want %d", gotc, wantc)
+	}
 }
 
 func TestBucketDoesNotExist(t *testing.T) {
@@ -140,36 +190,51 @@ func TestBucketDoesNotExist(t *testing.T) {
 	swap(t, &newS3Client, func(aws.Config, ...func(*s3.Options)) *S3Client {
 		return c
 	})
-	contents := "Hello world"
-	r := strings.NewReader(contents)
+	body := "Hello, world!"
+	r, bucket, key := strings.NewReader(body), "bucket", "file.txt"
+	validateParams := func(params *s3.PutObjectInput) {
+		if got, want := ptrstr(params.Bucket), ptrstr(&bucket); got != want {
+			t.Errorf("PutObjectInput.Bucket = %s, want %s", got, want)
+		}
+		if got, want := ptrstr(params.Key), ptrstr(&key); got != want {
+			t.Errorf("PutObjectInput.Key = %s, want %s", got, want)
+		}
+		if buf, err := io.ReadAll(params.Body); err != nil {
+			t.Errorf("failed to read PutObjectInput.Body: %s", err)
+		} else if got, want := string(buf), body; got != want {
+			t.Errorf("PutObjectInput.Body = %q, want %q", got, want)
+		}
+	}
 	c._PutObject_Do(func(
-		_ context.Context, in *s3.PutObjectInput, _ ...func(*s3.Options),
+		_ context.Context, params *s3.PutObjectInput, _ ...func(*s3.Options),
 	) (*s3.PutObjectOutput, error) {
-		_, _ = io.ReadAll(in.Body) // PutObject may empty its reader.
+		validateParams(params)
 		return nil, errors.New("NoSuchBucket")
 	})
 	c._CreateBucket_Stub()
 	c._PutObject_Do(func(
-		_ context.Context, in *s3.PutObjectInput, _ ...func(*s3.Options),
+		_ context.Context, params *s3.PutObjectInput, _ ...func(*s3.Options),
 	) (*s3.PutObjectOutput, error) {
-		buf, err := io.ReadAll(in.Body)
-		assert.NilError(t, err)
-		assert.Equal(t, contents, string(buf))
+		validateParams(params)
 		return nil, nil
 	})
 
-	err := upload(r, "bucket", "file.txt")
+	uerr := upload(r, bucket, key)
 
-	assert.NilError(t, err)
-	assert.Equal(t, len(c._PutObject_Calls()), 2)
-	for _, call := range c._PutObject_Calls() {
-		assert.Equal(t, *call.params.Bucket, "bucket")
-		assert.Equal(t, *call.params.Key, "file.txt")
-		assert.Equal(t, call.params.Body, r)
+	if uerr != nil {
+		t.Errorf("upload(%p, %q, %q) = %q, want nil", r, bucket, key, uerr)
 	}
-	assert.Equal(t, len(c._CreateBucket_Calls()), 1)
-	call := c._CreateBucket_Calls()[0]
-	assert.Equal(t, *call.params.Bucket, "bucket")
+	if gotc, wantc := len(c._PutObject_Calls()), 2; gotc != wantc {
+		t.Errorf("PutObject call count = %d, want %d", gotc, wantc)
+	}
+	if gotc, wantc := len(c._CreateBucket_Calls()), 1; gotc == wantc {
+		got, want := *c._CreateBucket_Calls()[0].params.Bucket, bucket
+		if got != want {
+			t.Errorf("CreateBucketInput.Bucket = %q, want %q", got, want)
+		}
+	} else {
+		t.Errorf("CreateBucket call count = %d, want %d", gotc, wantc)
+	}
 }
 
 func TestBucketExistsPutFailure(t *testing.T) {
@@ -177,19 +242,39 @@ func TestBucketExistsPutFailure(t *testing.T) {
 	swap(t, &newS3Client, func(aws.Config, ...func(*s3.Options)) *S3Client {
 		return c
 	})
-	r := strings.NewReader("foo")
+	body := "Hello, world!"
+	r, bucket, key := strings.NewReader(body), "bucket", "file.txt"
 	perr := errors.New("failed to PutObject")
 	c._PutObject_Return(nil, perr)
 
-	err := upload(r, "bucket", "file.txt")
+	uerr := upload(r, bucket, key)
 
-	assert.ErrorContains(t, err, perr.Error())
-	assert.Equal(t, len(c._PutObject_Calls()), 1)
-	call := c._PutObject_Calls()[0]
-	assert.Equal(t, *call.params.Bucket, "bucket")
-	assert.Equal(t, *call.params.Key, "file.txt")
-	assert.Equal(t, call.params.Body, r)
-	assert.Equal(t, len(c._CreateBucket_Calls()), 0)
+	if s := perr.Error(); uerr == nil {
+		t.Errorf("upload(%p, %q, %q) = <nil>, want substr %q",
+			r, bucket, key, s)
+	} else if got := uerr.Error(); !strings.Contains(got, s) {
+		t.Errorf("upload(%p, %q, %q) = %q, want substr %q",
+			r, bucket, key, got, s)
+	}
+	if gotc, wantc := len(c._PutObject_Calls()), 1; gotc == wantc {
+		params := c._PutObject_Calls()[0].params
+		if got, want := ptrstr(params.Bucket), ptrstr(&bucket); got != want {
+			t.Errorf("PutObjectInput.Bucket = %s, want %s", got, want)
+		}
+		if got, want := ptrstr(params.Key), ptrstr(&key); got != want {
+			t.Errorf("PutObjectInput.Key = %s, want %s", got, want)
+		}
+		if buf, err := io.ReadAll(params.Body); err != nil {
+			t.Errorf("failed to read PutObjectInput.Body: %s", err)
+		} else if got, want := string(buf), body; got != want {
+			t.Errorf("PutObjectInput.Body = %q, want %q", got, want)
+		}
+	} else {
+		t.Errorf("PutObject call count = %d, want %d", gotc, wantc)
+	}
+	if gotc, wantc := len(c._CreateBucket_Calls()), 0; gotc != wantc {
+		t.Errorf("CreateBucket call count = %d, want %d", gotc, wantc)
+	}
 }
 
 func TestBucketDoesNotExistCreateFailure(t *testing.T) {
@@ -197,38 +282,73 @@ func TestBucketDoesNotExistCreateFailure(t *testing.T) {
 	swap(t, &newS3Client, func(aws.Config, ...func(*s3.Options)) *S3Client {
 		return c
 	})
-	r := strings.NewReader("foo")
+	body := "Hello, world!"
+	r, bucket, key := strings.NewReader(body), "bucket", "file.txt"
 	cerr := errors.New("failed to CreateBucket")
 	c._PutObject_Return(nil, errors.New("NoSuchBucket"))
 	c._CreateBucket_Return(nil, cerr)
 
-	err := upload(r, "bucket", "file.txt")
+	uerr := upload(r, "bucket", "file.txt")
 
-	assert.ErrorContains(t, err, cerr.Error())
-	assert.Equal(t, len(c._PutObject_Calls()), 1)
-	pocall := c._PutObject_Calls()[0]
-	assert.Equal(t, *pocall.params.Bucket, "bucket")
-	assert.Equal(t, *pocall.params.Key, "file.txt")
-	assert.Equal(t, pocall.params.Body, r)
-	assert.Equal(t, len(c._CreateBucket_Calls()), 1)
-	cbcall := c._CreateBucket_Calls()[0]
-	assert.Equal(t, *cbcall.params.Bucket, "bucket")
+	if s := cerr.Error(); uerr == nil {
+		t.Errorf("upload(%p, %q, %q) = <nil>, want substr %q",
+			r, bucket, key, s)
+	} else if got := uerr.Error(); !strings.Contains(got, s) {
+		t.Errorf("upload(%p, %q, %q) = %q, want substr %q",
+			r, bucket, key, got, s)
+	}
+	if gotc, wantc := len(c._PutObject_Calls()), 1; gotc == wantc {
+		params := c._PutObject_Calls()[0].params
+		if got, want := ptrstr(params.Bucket), ptrstr(&bucket); got != want {
+			t.Errorf("PutObjectInput.Bucket = %s, want %s", got, want)
+		}
+		if got, want := ptrstr(params.Key), ptrstr(&key); got != want {
+			t.Errorf("PutObjectInput.Key = %s, want %s", got, want)
+		}
+		if buf, err := io.ReadAll(params.Body); err != nil {
+			t.Errorf("failed to read PutObjectInput.Body: %s", err)
+		} else if got, want := string(buf), body; got != want {
+			t.Errorf("PutObjectInput.Body = %q, want %q", got, want)
+		}
+	} else {
+		t.Errorf("PutObject call count = %d, want %d", gotc, wantc)
+	}
+	if gotc, wantc := len(c._CreateBucket_Calls()), 1; gotc == wantc {
+		got, want := *c._CreateBucket_Calls()[0].params.Bucket, bucket
+		if got != want {
+			t.Errorf("CreateBucketInput.Bucket = %q, want %q", got, want)
+		}
+	} else {
+		t.Errorf("CreateBucket call count = %d, want %d", gotc, wantc)
+	}
 }
 
 func TestS3OptsFunc(t *testing.T) {
 	opts := new(s3.Options)
 	s3OptsFunc(opts)
-	assert.Equal(t, opts.BaseEndpoint, s3opts.BaseEndpoint)
-	assert.Equal(t, opts.Credentials, s3opts.Credentials)
+	copts := cmpopts.IgnoreUnexported(s3.Options{})
+	if !cmp.Equal(s3opts, *opts, copts) {
+		t.Errorf("s3.Options -want +got:\n%s", cmp.Diff(s3opts, *opts, copts))
+	}
 }
 
 func TestNewS3Client(t *testing.T) {
-	c := newS3Client(aws.Config{})
-	assert.Assert(t, c.Client != nil)
+	if cfg := (aws.Config{}); newS3Client(cfg).Client == nil {
+		t.Errorf("newS3Client(%+v) = <nil>", cfg)
+	}
 }
 
 func swap[T any](t *testing.T, orig *T, with T) {
+	t.Helper()
 	o := *orig
 	t.Cleanup(func() { *orig = o })
 	*orig = with
+}
+
+func ptrstr(s *string) string {
+	if s == nil {
+		return "<nil>"
+	} else {
+		return fmt.Sprintf("*%q", *s)
+	}
 }

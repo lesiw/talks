@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.30.3
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.27
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.58.2
-	gotest.tools/v3 v3.5.1
+	github.com/google/go-cmp v0.6.0
 )
 
 require (
@@ -19,5 +19,4 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.17 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.15 // indirect
 	github.com/aws/smithy-go v1.20.3 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
 )
