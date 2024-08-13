@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"unsafe"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -163,27 +164,16 @@ func TestBucketExists(t *testing.T) {
 	if uerr != nil {
 		t.Errorf("upload(%p, %q, %q) = %q, want nil", r, bucket, key, uerr)
 	}
-	if gotc, wantc := len(c._PutObject_Calls()), 1; gotc == wantc {
-		got := c._PutObject_Calls()[0].params
-		want := &s3.PutObjectInput{
-			Body:   r,
-			Bucket: aws.String(bucket),
-			Key:    aws.String(key),
-		}
-		opts := []cmp.Option{
-			cmpopts.IgnoreUnexported(s3.PutObjectInput{}),
-			cmpopts.EquateComparable(strings.Reader{}),
-		}
-		if !cmp.Equal(got, want, opts...) {
-			t.Errorf("PutObjectInput: -want +got\n%s",
-				cmp.Diff(want, got, opts...))
-		}
-	} else {
-		t.Errorf("PutObject call count = %d, want %d", gotc, wantc)
-	}
-	if gotc, wantc := len(c._CreateBucket_Calls()), 0; gotc != wantc {
-		t.Errorf("CreateBucket call count = %d, want %d", gotc, wantc)
-	}
+	checkEqual(t, "PutObject() calls", c._PutObject_Calls(),
+		[]_S3Client_PutObject_Call{
+			{Params: &s3.PutObjectInput{
+				Body:   r,
+				Bucket: aws.String(bucket),
+				Key:    aws.String(key),
+			}},
+		},
+	)
+	checkEqual(t, "CreateBucket() calls", c._CreateBucket_Calls(), nil)
 }
 
 func TestBucketDoesNotExist(t *testing.T) {
@@ -193,21 +183,7 @@ func TestBucketDoesNotExist(t *testing.T) {
 	})
 	body := "Hello, world!"
 	r, bucket, key := strings.NewReader(body), "bucket", "file.txt"
-	validateParams := func(params *s3.PutObjectInput) {
-		got := c._PutObject_Calls()[0].params
-		want := &s3.PutObjectInput{
-			Body:   r,
-			Bucket: aws.String(bucket),
-			Key:    aws.String(key),
-		}
-		opts := []cmp.Option{
-			cmpopts.IgnoreUnexported(s3.PutObjectInput{}),
-			cmpopts.EquateComparable(strings.Reader{}),
-		}
-		if !cmp.Equal(got, want, opts...) {
-			t.Errorf("PutObjectInput: -want +got\n%s",
-				cmp.Diff(want, got, opts...))
-		}
+	readBody := func(params *s3.PutObjectInput) {
 		if buf, err := io.ReadAll(params.Body); err != nil {
 			t.Errorf("failed to read PutObjectInput.Body: %s", err)
 		} else if got, want := string(buf), body; got != want {
@@ -217,14 +193,14 @@ func TestBucketDoesNotExist(t *testing.T) {
 	c._PutObject_Do(func(
 		_ context.Context, params *s3.PutObjectInput, _ ...func(*s3.Options),
 	) (*s3.PutObjectOutput, error) {
-		validateParams(params)
+		readBody(params)
 		return nil, errors.New("NoSuchBucket")
 	})
 	c._CreateBucket_Stub()
 	c._PutObject_Do(func(
 		_ context.Context, params *s3.PutObjectInput, _ ...func(*s3.Options),
 	) (*s3.PutObjectOutput, error) {
-		validateParams(params)
+		readBody(params)
 		return nil, nil
 	})
 
@@ -233,17 +209,25 @@ func TestBucketDoesNotExist(t *testing.T) {
 	if uerr != nil {
 		t.Errorf("upload(%p, %q, %q) = %q, want nil", r, bucket, key, uerr)
 	}
-	if gotc, wantc := len(c._PutObject_Calls()), 2; gotc != wantc {
-		t.Errorf("PutObject call count = %d, want %d", gotc, wantc)
-	}
-	if gotc, wantc := len(c._CreateBucket_Calls()), 1; gotc == wantc {
-		got, want := *c._CreateBucket_Calls()[0].params.Bucket, bucket
-		if got != want {
-			t.Errorf("CreateBucketInput.Bucket = %q, want %q", got, want)
-		}
-	} else {
-		t.Errorf("CreateBucket call count = %d, want %d", gotc, wantc)
-	}
+	checkEqual(t, "PutObject() calls", c._PutObject_Calls(),
+		[]_S3Client_PutObject_Call{
+			{Params: &s3.PutObjectInput{
+				Body:   r,
+				Bucket: aws.String(bucket),
+				Key:    aws.String(key),
+			}},
+			{Params: &s3.PutObjectInput{
+				Body:   r,
+				Bucket: aws.String(bucket),
+				Key:    aws.String(key),
+			}},
+		},
+	)
+	checkEqual(t, "CreateBucket() calls", c._CreateBucket_Calls(),
+		[]_S3Client_CreateBucket_Call{
+			{Params: &s3.CreateBucketInput{Bucket: aws.String(bucket)}},
+		},
+	)
 }
 
 func TestBucketExistsPutFailure(t *testing.T) {
@@ -265,27 +249,16 @@ func TestBucketExistsPutFailure(t *testing.T) {
 		t.Errorf("upload(%p, %q, %q) = %q, want substr %q",
 			r, bucket, key, got, s)
 	}
-	if gotc, wantc := len(c._PutObject_Calls()), 1; gotc == wantc {
-		got := c._PutObject_Calls()[0].params
-		want := &s3.PutObjectInput{
-			Body:   r,
-			Bucket: aws.String(bucket),
-			Key:    aws.String(key),
-		}
-		opts := []cmp.Option{
-			cmpopts.IgnoreUnexported(s3.PutObjectInput{}),
-			cmpopts.EquateComparable(strings.Reader{}),
-		}
-		if !cmp.Equal(got, want, opts...) {
-			t.Errorf("PutObjectInput: -want +got\n%s",
-				cmp.Diff(want, got, opts...))
-		}
-	} else {
-		t.Errorf("PutObject call count = %d, want %d", gotc, wantc)
-	}
-	if gotc, wantc := len(c._CreateBucket_Calls()), 0; gotc != wantc {
-		t.Errorf("CreateBucket call count = %d, want %d", gotc, wantc)
-	}
+	checkEqual(t, "PutObject() calls", c._PutObject_Calls(),
+		[]_S3Client_PutObject_Call{
+			{Params: &s3.PutObjectInput{
+				Body:   r,
+				Bucket: aws.String(bucket),
+				Key:    aws.String(key),
+			}},
+		},
+	)
+	checkEqual(t, "CreateBucket() calls", c._CreateBucket_Calls(), nil)
 }
 
 func TestBucketDoesNotExistCreateFailure(t *testing.T) {
@@ -308,32 +281,20 @@ func TestBucketDoesNotExistCreateFailure(t *testing.T) {
 		t.Errorf("upload(%p, %q, %q) = %q, want substr %q",
 			r, bucket, key, got, s)
 	}
-	if gotc, wantc := len(c._PutObject_Calls()), 1; gotc == wantc {
-		got := c._PutObject_Calls()[0].params
-		want := &s3.PutObjectInput{
-			Body:   r,
-			Bucket: aws.String(bucket),
-			Key:    aws.String(key),
-		}
-		opts := []cmp.Option{
-			cmpopts.IgnoreUnexported(s3.PutObjectInput{}),
-			cmpopts.EquateComparable(strings.Reader{}),
-		}
-		if !cmp.Equal(got, want, opts...) {
-			t.Errorf("PutObjectInput: -want +got\n%s",
-				cmp.Diff(want, got, opts...))
-		}
-	} else {
-		t.Errorf("PutObject call count = %d, want %d", gotc, wantc)
-	}
-	if gotc, wantc := len(c._CreateBucket_Calls()), 1; gotc == wantc {
-		got, want := *c._CreateBucket_Calls()[0].params.Bucket, bucket
-		if got != want {
-			t.Errorf("CreateBucketInput.Bucket = %q, want %q", got, want)
-		}
-	} else {
-		t.Errorf("CreateBucket call count = %d, want %d", gotc, wantc)
-	}
+	checkEqual(t, "PutObject() calls", c._PutObject_Calls(),
+		[]_S3Client_PutObject_Call{
+			{Params: &s3.PutObjectInput{
+				Body:   r,
+				Bucket: aws.String(bucket),
+				Key:    aws.String(key),
+			}},
+		},
+	)
+	checkEqual(t, "CreateBucket() calls", c._CreateBucket_Calls(),
+		[]_S3Client_CreateBucket_Call{
+			{Params: &s3.CreateBucketInput{Bucket: aws.String(bucket)}},
+		},
+	)
 }
 
 func TestS3OptsFunc(t *testing.T) {
@@ -356,4 +317,20 @@ func swap[T any](t *testing.T, orig *T, with T) {
 	o := *orig
 	t.Cleanup(func() { *orig = o })
 	*orig = with
+}
+
+func checkEqual[T any](t *testing.T, name string, got, want T) {
+	opts := []cmp.Option{
+		cmpopts.IgnoreUnexported(s3.CreateBucketInput{}),
+		cmpopts.IgnoreUnexported(s3.PutObjectInput{}),
+		cmpopts.IgnoreInterfaces(struct{ context.Context }{}),
+		cmp.Comparer(ptrcmp[strings.Reader]),
+	}
+	if !cmp.Equal(got, want, opts...) {
+		t.Errorf("%s -want +got\n%s", name, cmp.Diff(got, want, opts...))
+	}
+}
+
+func ptrcmp[T any](x, y *T) bool {
+	return unsafe.Pointer(x) == unsafe.Pointer(y)
 }

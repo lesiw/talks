@@ -3,11 +3,11 @@
 package main
 
 import (
+	context "context"
+	s3 "github.com/aws/aws-sdk-go-v2/service/s3"
 	runtime "runtime"
 	sync "sync"
 	unsafe "unsafe"
-	context "context"
-	s3 "github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 var _S3Client = new(sync.Map)
@@ -219,577 +219,480 @@ func _S3ClientPtrData(t *S3Client) *_S3ClientData {
 }
 
 type _S3Client_AbortMultipartUpload_Call struct {
-	ctx context.Context
-	params *s3.AbortMultipartUploadInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.AbortMultipartUploadInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_CompleteMultipartUpload_Call struct {
-	ctx context.Context
-	params *s3.CompleteMultipartUploadInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.CompleteMultipartUploadInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_CopyObject_Call struct {
-	ctx context.Context
-	params *s3.CopyObjectInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.CopyObjectInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_CreateBucket_Call struct {
-	ctx context.Context
-	params *s3.CreateBucketInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.CreateBucketInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_CreateMultipartUpload_Call struct {
-	ctx context.Context
-	params *s3.CreateMultipartUploadInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.CreateMultipartUploadInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_CreateSession_Call struct {
-	ctx context.Context
-	params *s3.CreateSessionInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.CreateSessionInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucket_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucketAnalyticsConfiguration_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketAnalyticsConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketAnalyticsConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucketCors_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketCorsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketCorsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucketEncryption_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketEncryptionInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketEncryptionInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucketIntelligentTieringConfiguration_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketIntelligentTieringConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketIntelligentTieringConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucketInventoryConfiguration_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketInventoryConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketInventoryConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucketLifecycle_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketLifecycleInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketLifecycleInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucketMetricsConfiguration_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketMetricsConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketMetricsConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucketOwnershipControls_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketOwnershipControlsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketOwnershipControlsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucketPolicy_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketPolicyInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketPolicyInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucketReplication_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketReplicationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketReplicationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucketTagging_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketTaggingInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketTaggingInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteBucketWebsite_Call struct {
-	ctx context.Context
-	params *s3.DeleteBucketWebsiteInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteBucketWebsiteInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteObject_Call struct {
-	ctx context.Context
-	params *s3.DeleteObjectInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteObjectInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteObjectTagging_Call struct {
-	ctx context.Context
-	params *s3.DeleteObjectTaggingInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteObjectTaggingInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeleteObjects_Call struct {
-	ctx context.Context
-	params *s3.DeleteObjectsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeleteObjectsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_DeletePublicAccessBlock_Call struct {
-	ctx context.Context
-	params *s3.DeletePublicAccessBlockInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.DeletePublicAccessBlockInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketAccelerateConfiguration_Call struct {
-	ctx context.Context
-	params *s3.GetBucketAccelerateConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketAccelerateConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketAcl_Call struct {
-	ctx context.Context
-	params *s3.GetBucketAclInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketAclInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketAnalyticsConfiguration_Call struct {
-	ctx context.Context
-	params *s3.GetBucketAnalyticsConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketAnalyticsConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketCors_Call struct {
-	ctx context.Context
-	params *s3.GetBucketCorsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketCorsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketEncryption_Call struct {
-	ctx context.Context
-	params *s3.GetBucketEncryptionInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketEncryptionInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketIntelligentTieringConfiguration_Call struct {
-	ctx context.Context
-	params *s3.GetBucketIntelligentTieringConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketIntelligentTieringConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketInventoryConfiguration_Call struct {
-	ctx context.Context
-	params *s3.GetBucketInventoryConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketInventoryConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketLifecycleConfiguration_Call struct {
-	ctx context.Context
-	params *s3.GetBucketLifecycleConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketLifecycleConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketLocation_Call struct {
-	ctx context.Context
-	params *s3.GetBucketLocationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketLocationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketLogging_Call struct {
-	ctx context.Context
-	params *s3.GetBucketLoggingInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketLoggingInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketMetricsConfiguration_Call struct {
-	ctx context.Context
-	params *s3.GetBucketMetricsConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketMetricsConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketNotificationConfiguration_Call struct {
-	ctx context.Context
-	params *s3.GetBucketNotificationConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketNotificationConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketOwnershipControls_Call struct {
-	ctx context.Context
-	params *s3.GetBucketOwnershipControlsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketOwnershipControlsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketPolicy_Call struct {
-	ctx context.Context
-	params *s3.GetBucketPolicyInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketPolicyInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketPolicyStatus_Call struct {
-	ctx context.Context
-	params *s3.GetBucketPolicyStatusInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketPolicyStatusInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketReplication_Call struct {
-	ctx context.Context
-	params *s3.GetBucketReplicationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketReplicationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketRequestPayment_Call struct {
-	ctx context.Context
-	params *s3.GetBucketRequestPaymentInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketRequestPaymentInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketTagging_Call struct {
-	ctx context.Context
-	params *s3.GetBucketTaggingInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketTaggingInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketVersioning_Call struct {
-	ctx context.Context
-	params *s3.GetBucketVersioningInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketVersioningInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetBucketWebsite_Call struct {
-	ctx context.Context
-	params *s3.GetBucketWebsiteInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetBucketWebsiteInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetObject_Call struct {
-	ctx context.Context
-	params *s3.GetObjectInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetObjectInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetObjectAcl_Call struct {
-	ctx context.Context
-	params *s3.GetObjectAclInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetObjectAclInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetObjectAttributes_Call struct {
-	ctx context.Context
-	params *s3.GetObjectAttributesInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetObjectAttributesInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetObjectLegalHold_Call struct {
-	ctx context.Context
-	params *s3.GetObjectLegalHoldInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetObjectLegalHoldInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetObjectLockConfiguration_Call struct {
-	ctx context.Context
-	params *s3.GetObjectLockConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetObjectLockConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetObjectRetention_Call struct {
-	ctx context.Context
-	params *s3.GetObjectRetentionInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetObjectRetentionInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetObjectTagging_Call struct {
-	ctx context.Context
-	params *s3.GetObjectTaggingInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetObjectTaggingInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetObjectTorrent_Call struct {
-	ctx context.Context
-	params *s3.GetObjectTorrentInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetObjectTorrentInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_GetPublicAccessBlock_Call struct {
-	ctx context.Context
-	params *s3.GetPublicAccessBlockInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.GetPublicAccessBlockInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_HeadBucket_Call struct {
-	ctx context.Context
-	params *s3.HeadBucketInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.HeadBucketInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_HeadObject_Call struct {
-	ctx context.Context
-	params *s3.HeadObjectInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.HeadObjectInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_ListBucketAnalyticsConfigurations_Call struct {
-	ctx context.Context
-	params *s3.ListBucketAnalyticsConfigurationsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.ListBucketAnalyticsConfigurationsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_ListBucketIntelligentTieringConfigurations_Call struct {
-	ctx context.Context
-	params *s3.ListBucketIntelligentTieringConfigurationsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.ListBucketIntelligentTieringConfigurationsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_ListBucketInventoryConfigurations_Call struct {
-	ctx context.Context
-	params *s3.ListBucketInventoryConfigurationsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.ListBucketInventoryConfigurationsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_ListBucketMetricsConfigurations_Call struct {
-	ctx context.Context
-	params *s3.ListBucketMetricsConfigurationsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.ListBucketMetricsConfigurationsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_ListBuckets_Call struct {
-	ctx context.Context
-	params *s3.ListBucketsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.ListBucketsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_ListDirectoryBuckets_Call struct {
-	ctx context.Context
-	params *s3.ListDirectoryBucketsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.ListDirectoryBucketsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_ListMultipartUploads_Call struct {
-	ctx context.Context
-	params *s3.ListMultipartUploadsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.ListMultipartUploadsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_ListObjectVersions_Call struct {
-	ctx context.Context
-	params *s3.ListObjectVersionsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.ListObjectVersionsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_ListObjects_Call struct {
-	ctx context.Context
-	params *s3.ListObjectsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.ListObjectsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_ListObjectsV2_Call struct {
-	ctx context.Context
-	params *s3.ListObjectsV2Input
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.ListObjectsV2Input
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_ListParts_Call struct {
-	ctx context.Context
-	params *s3.ListPartsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.ListPartsInput
+	OptFns []func(*s3.Options)
 }
-
-type _S3Client_Options_Call struct {
-
-}
-
+type _S3Client_Options_Call struct {}
 type _S3Client_PutBucketAccelerateConfiguration_Call struct {
-	ctx context.Context
-	params *s3.PutBucketAccelerateConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketAccelerateConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketAcl_Call struct {
-	ctx context.Context
-	params *s3.PutBucketAclInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketAclInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketAnalyticsConfiguration_Call struct {
-	ctx context.Context
-	params *s3.PutBucketAnalyticsConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketAnalyticsConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketCors_Call struct {
-	ctx context.Context
-	params *s3.PutBucketCorsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketCorsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketEncryption_Call struct {
-	ctx context.Context
-	params *s3.PutBucketEncryptionInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketEncryptionInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketIntelligentTieringConfiguration_Call struct {
-	ctx context.Context
-	params *s3.PutBucketIntelligentTieringConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketIntelligentTieringConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketInventoryConfiguration_Call struct {
-	ctx context.Context
-	params *s3.PutBucketInventoryConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketInventoryConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketLifecycleConfiguration_Call struct {
-	ctx context.Context
-	params *s3.PutBucketLifecycleConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketLifecycleConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketLogging_Call struct {
-	ctx context.Context
-	params *s3.PutBucketLoggingInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketLoggingInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketMetricsConfiguration_Call struct {
-	ctx context.Context
-	params *s3.PutBucketMetricsConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketMetricsConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketNotificationConfiguration_Call struct {
-	ctx context.Context
-	params *s3.PutBucketNotificationConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketNotificationConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketOwnershipControls_Call struct {
-	ctx context.Context
-	params *s3.PutBucketOwnershipControlsInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketOwnershipControlsInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketPolicy_Call struct {
-	ctx context.Context
-	params *s3.PutBucketPolicyInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketPolicyInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketReplication_Call struct {
-	ctx context.Context
-	params *s3.PutBucketReplicationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketReplicationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketRequestPayment_Call struct {
-	ctx context.Context
-	params *s3.PutBucketRequestPaymentInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketRequestPaymentInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketTagging_Call struct {
-	ctx context.Context
-	params *s3.PutBucketTaggingInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketTaggingInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketVersioning_Call struct {
-	ctx context.Context
-	params *s3.PutBucketVersioningInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketVersioningInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutBucketWebsite_Call struct {
-	ctx context.Context
-	params *s3.PutBucketWebsiteInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutBucketWebsiteInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutObject_Call struct {
-	ctx context.Context
-	params *s3.PutObjectInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutObjectInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutObjectAcl_Call struct {
-	ctx context.Context
-	params *s3.PutObjectAclInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutObjectAclInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutObjectLegalHold_Call struct {
-	ctx context.Context
-	params *s3.PutObjectLegalHoldInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutObjectLegalHoldInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutObjectLockConfiguration_Call struct {
-	ctx context.Context
-	params *s3.PutObjectLockConfigurationInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutObjectLockConfigurationInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutObjectRetention_Call struct {
-	ctx context.Context
-	params *s3.PutObjectRetentionInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutObjectRetentionInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutObjectTagging_Call struct {
-	ctx context.Context
-	params *s3.PutObjectTaggingInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutObjectTaggingInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_PutPublicAccessBlock_Call struct {
-	ctx context.Context
-	params *s3.PutPublicAccessBlockInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.PutPublicAccessBlockInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_RestoreObject_Call struct {
-	ctx context.Context
-	params *s3.RestoreObjectInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.RestoreObjectInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_SelectObjectContent_Call struct {
-	ctx context.Context
-	params *s3.SelectObjectContentInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.SelectObjectContentInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_UploadPart_Call struct {
-	ctx context.Context
-	params *s3.UploadPartInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.UploadPartInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_UploadPartCopy_Call struct {
-	ctx context.Context
-	params *s3.UploadPartCopyInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.UploadPartCopyInput
+	OptFns []func(*s3.Options)
 }
-
 type _S3Client_WriteGetObjectResponse_Call struct {
-	ctx context.Context
-	params *s3.WriteGetObjectResponseInput
-	optFns []func(*s3.Options)
+	Ctx context.Context
+	Params *s3.WriteGetObjectResponseInput
+	OptFns []func(*s3.Options)
 }
 
 func (_recv *S3Client) AbortMultipartUpload(ctx context.Context, params *s3.AbortMultipartUploadInput, optFns ...func(*s3.Options)) (*s3.AbortMultipartUploadOutput, error) {
@@ -6359,4 +6262,3 @@ func (_recv *S3Client) _WriteGetObjectResponse_Calls() []_S3Client_WriteGetObjec
 	_dat.mutex.Lock()
 	return _dat.WriteGetObjectResponseCalls
 }
-
