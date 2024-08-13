@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -165,17 +164,19 @@ func TestBucketExists(t *testing.T) {
 		t.Errorf("upload(%p, %q, %q) = %q, want nil", r, bucket, key, uerr)
 	}
 	if gotc, wantc := len(c._PutObject_Calls()), 1; gotc == wantc {
-		params := c._PutObject_Calls()[0].params
-		if got, want := ptrstr(params.Bucket), ptrstr(&bucket); got != want {
-			t.Errorf("PutObjectInput.Bucket = %s, want %s", got, want)
+		got := c._PutObject_Calls()[0].params
+		want := &s3.PutObjectInput{
+			Body:   r,
+			Bucket: aws.String(bucket),
+			Key:    aws.String(key),
 		}
-		if got, want := ptrstr(params.Key), ptrstr(&key); got != want {
-			t.Errorf("PutObjectInput.Key = %s, want %s", got, want)
+		opts := []cmp.Option{
+			cmpopts.IgnoreUnexported(s3.PutObjectInput{}),
+			cmpopts.EquateComparable(strings.Reader{}),
 		}
-		if buf, err := io.ReadAll(params.Body); err != nil {
-			t.Errorf("failed to read PutObjectInput.Body: %s", err)
-		} else if got, want := string(buf), body; got != want {
-			t.Errorf("PutObjectInput.Body = %q, want %q", got, want)
+		if !cmp.Equal(got, want, opts...) {
+			t.Errorf("PutObjectInput: -want +got\n%s",
+				cmp.Diff(want, got, opts...))
 		}
 	} else {
 		t.Errorf("PutObject call count = %d, want %d", gotc, wantc)
@@ -193,11 +194,19 @@ func TestBucketDoesNotExist(t *testing.T) {
 	body := "Hello, world!"
 	r, bucket, key := strings.NewReader(body), "bucket", "file.txt"
 	validateParams := func(params *s3.PutObjectInput) {
-		if got, want := ptrstr(params.Bucket), ptrstr(&bucket); got != want {
-			t.Errorf("PutObjectInput.Bucket = %s, want %s", got, want)
+		got := c._PutObject_Calls()[0].params
+		want := &s3.PutObjectInput{
+			Body:   r,
+			Bucket: aws.String(bucket),
+			Key:    aws.String(key),
 		}
-		if got, want := ptrstr(params.Key), ptrstr(&key); got != want {
-			t.Errorf("PutObjectInput.Key = %s, want %s", got, want)
+		opts := []cmp.Option{
+			cmpopts.IgnoreUnexported(s3.PutObjectInput{}),
+			cmpopts.EquateComparable(strings.Reader{}),
+		}
+		if !cmp.Equal(got, want, opts...) {
+			t.Errorf("PutObjectInput: -want +got\n%s",
+				cmp.Diff(want, got, opts...))
 		}
 		if buf, err := io.ReadAll(params.Body); err != nil {
 			t.Errorf("failed to read PutObjectInput.Body: %s", err)
@@ -257,17 +266,19 @@ func TestBucketExistsPutFailure(t *testing.T) {
 			r, bucket, key, got, s)
 	}
 	if gotc, wantc := len(c._PutObject_Calls()), 1; gotc == wantc {
-		params := c._PutObject_Calls()[0].params
-		if got, want := ptrstr(params.Bucket), ptrstr(&bucket); got != want {
-			t.Errorf("PutObjectInput.Bucket = %s, want %s", got, want)
+		got := c._PutObject_Calls()[0].params
+		want := &s3.PutObjectInput{
+			Body:   r,
+			Bucket: aws.String(bucket),
+			Key:    aws.String(key),
 		}
-		if got, want := ptrstr(params.Key), ptrstr(&key); got != want {
-			t.Errorf("PutObjectInput.Key = %s, want %s", got, want)
+		opts := []cmp.Option{
+			cmpopts.IgnoreUnexported(s3.PutObjectInput{}),
+			cmpopts.EquateComparable(strings.Reader{}),
 		}
-		if buf, err := io.ReadAll(params.Body); err != nil {
-			t.Errorf("failed to read PutObjectInput.Body: %s", err)
-		} else if got, want := string(buf), body; got != want {
-			t.Errorf("PutObjectInput.Body = %q, want %q", got, want)
+		if !cmp.Equal(got, want, opts...) {
+			t.Errorf("PutObjectInput: -want +got\n%s",
+				cmp.Diff(want, got, opts...))
 		}
 	} else {
 		t.Errorf("PutObject call count = %d, want %d", gotc, wantc)
@@ -298,17 +309,19 @@ func TestBucketDoesNotExistCreateFailure(t *testing.T) {
 			r, bucket, key, got, s)
 	}
 	if gotc, wantc := len(c._PutObject_Calls()), 1; gotc == wantc {
-		params := c._PutObject_Calls()[0].params
-		if got, want := ptrstr(params.Bucket), ptrstr(&bucket); got != want {
-			t.Errorf("PutObjectInput.Bucket = %s, want %s", got, want)
+		got := c._PutObject_Calls()[0].params
+		want := &s3.PutObjectInput{
+			Body:   r,
+			Bucket: aws.String(bucket),
+			Key:    aws.String(key),
 		}
-		if got, want := ptrstr(params.Key), ptrstr(&key); got != want {
-			t.Errorf("PutObjectInput.Key = %s, want %s", got, want)
+		opts := []cmp.Option{
+			cmpopts.IgnoreUnexported(s3.PutObjectInput{}),
+			cmpopts.EquateComparable(strings.Reader{}),
 		}
-		if buf, err := io.ReadAll(params.Body); err != nil {
-			t.Errorf("failed to read PutObjectInput.Body: %s", err)
-		} else if got, want := string(buf), body; got != want {
-			t.Errorf("PutObjectInput.Body = %q, want %q", got, want)
+		if !cmp.Equal(got, want, opts...) {
+			t.Errorf("PutObjectInput: -want +got\n%s",
+				cmp.Diff(want, got, opts...))
 		}
 	} else {
 		t.Errorf("PutObject call count = %d, want %d", gotc, wantc)
@@ -343,12 +356,4 @@ func swap[T any](t *testing.T, orig *T, with T) {
 	o := *orig
 	t.Cleanup(func() { *orig = o })
 	*orig = with
-}
-
-func ptrstr(s *string) string {
-	if s == nil {
-		return "<nil>"
-	} else {
-		return fmt.Sprintf("*%q", *s)
-	}
 }
