@@ -320,6 +320,7 @@ func swap[T any](t *testing.T, orig *T, with T) {
 }
 
 func checkEqual[T any](t *testing.T, name string, got, want T) {
+	t.Helper()
 	opts := []cmp.Option{
 		cmpopts.IgnoreUnexported(s3.CreateBucketInput{}),
 		cmpopts.IgnoreUnexported(s3.PutObjectInput{}),
